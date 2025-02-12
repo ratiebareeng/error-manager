@@ -62,6 +62,7 @@ class ErrorManager {
 
     // Log to console in debug
     if (kDebugMode) {
+      //lineNumber: details.stackTrace?.lineNumber ?? 0,
       switch (logType) {
         case LogType.debug:
           _logger.d(logMessage);
