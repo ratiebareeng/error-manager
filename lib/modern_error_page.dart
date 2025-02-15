@@ -31,7 +31,7 @@ class ErrorPage extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .errorContainer
-                        .withOpacity(0.2),
+                        .withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
