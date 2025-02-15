@@ -26,7 +26,7 @@ class ErrorManager {
 
     final function = originFunction == null || originFunction.isEmpty
         ? null
-        : 'Function: $fileName';
+        : '\nFunction: $fileName';
     if (function != null) {
       logMessage = logMessage + function;
     }
