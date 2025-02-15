@@ -95,20 +95,41 @@ class ErrorManager {
     String? developer,
     StackTrace? stackTrace,
   }) async {
-    String logMessage = generateMessage(
-      errorMessage: errorMessage,
-      fileName: fileName,
-      originFunction: originFunction,
-      developer: developer,
-      stackTrace: stackTrace,
-    );
+    try {
+      String logMessage = generateMessage(
+        errorMessage: errorMessage,
+        fileName: fileName,
+        originFunction: originFunction,
+        developer: developer,
+        stackTrace: stackTrace,
+      );
 
-    var directory = await getDownloadsDirectory();
-    directory ??= await getApplicationDocumentsDirectory();
-    var filename =
-        fileName ?? 'error_log${DateTime.now().toIso8601String()}.txt';
-    final file = File('${directory.path}/error_manager/$filename');
-    await file.writeAsString('$logMessage\n', mode: FileMode.append);
+      final directory = await getDownloadsDirectory() ??
+          await getApplicationDocumentsDirectory();
+      final logDirectory = Directory('${directory.path}/error_manager');
+
+      // Create directory if it doesn't exist
+      if (!await logDirectory.exists()) {
+        await logDirectory.create(recursive: true);
+      }
+
+      // Use logFileName if provided, otherwise default name
+      final filename = logFileName ??
+          'error_log_${DateTime.now().toIso8601String().replaceAll(':', '-')}.txt';
+      final file = File('${logDirectory.path}/$filename');
+
+      // Write to file
+      await file.writeAsString('$logMessage\n', mode: FileMode.append);
+
+      // Log success in debug mode
+      if (kDebugMode) {
+        _logger.i('Error logged to: ${file.path}');
+      }
+    } catch (e, stack) {
+      if (kDebugMode) {
+        _logger.e('Failed to log error to file', error: e, stackTrace: stack);
+      }
+    }
   }
 }
 
