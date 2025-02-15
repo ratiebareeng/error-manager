@@ -23,12 +23,12 @@ void setupErrorManager() {
   };
 
   // Log uncaught platform errors
-  PlatformDispatcher.instance.onError = (error, stack) async {
-    await ErrorManager.logToFile(
+  PlatformDispatcher.instance.onError = (error, stack) {
+    ErrorManager.logToFile(
       fileName: stack.toString(),
       errorMessage: error.toString(),
       stackTrace: stack,
-    );
+    ).catchError((e) {});
     return true;
   } as ErrorCallback?;
 }
