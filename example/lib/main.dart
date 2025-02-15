@@ -1,3 +1,4 @@
+import 'package:error_manager/error_manager.dart';
 import 'package:error_manager/setup_error_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -20,11 +21,42 @@ class HomeScreen extends StatelessWidget {
           children: [
             // Button to trigger an error
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Simulate an error
+                ErrorManager.logError(
+                    errorMessage: 'This is a test exception!',
+                    originFunction: 'build',
+                    fileName: 'main.dart',
+                    developer: 'Naledi');
+                await ErrorManager.logToFile(
+                    errorMessage: 'This is a test exception!',
+                    developer: 'Naledi');
                 throw Exception('This is a test exception!');
               },
               child: const Text('Trigger Error'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                // Log an error
+                ErrorManager.logError(
+                    errorMessage: 'This is a test exception!',
+                    originFunction: 'build',
+                    fileName: 'main.dart',
+                    developer: 'Naledi');
+              },
+              child: const Text('Log Error'),
+            ),
+            const SizedBox(height: 20),
+            // Button to trigger an error
+            ElevatedButton(
+              onPressed: () async {
+                // Simulate an error
+                await ErrorManager.logToFile(
+                    errorMessage: 'This is a test exception!',
+                    developer: 'Naledi');
+              },
+              child: const Text('Write to File'),
             ),
             const SizedBox(height: 20),
             // Button to trigger a widget error
