@@ -13,6 +13,11 @@ A simple error management solution for Flutter applications. Suitable to quickly
 - 🔍 Detailed stack trace handling
 - 👨‍💻 Developer attribution for errors
 
+## Requirements
+
+- Flutter: >=3.0.0
+- Dart: >=3.0.0
+
 ## Installation
 
 Add this to your package's `pubspec.yaml` file:
@@ -135,11 +140,6 @@ Error logs include:
 - Developer name (optional)
 - Stack trace
 - Timestamp (for file logs)
-
-## Requirements
-
-- Flutter: >=3.0.0
-- Dart: >=3.0.0
 
 ## Additional Information
 
