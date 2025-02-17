@@ -1,6 +1,6 @@
 # Flutter Error Manager
 
-A comprehensive error management solution for Flutter applications that provides error logging, file-based logging, and customizable error pages.
+A simple error management solution for Flutter applications. Suitable to quickly setup error logging that includes file-based logging, and customizable error pages.
 
 ## Features
 
