@@ -4,6 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/web.dart';
 import 'package:path_provider/path_provider.dart';
 
+Future<Directory?> getDownloadDir() async {
+  if (Platform.isAndroid ||
+      Platform.isIOS ||
+      Platform.isMacOS ||
+      Platform.isWindows) {
+    return await getDownloadsDirectory() ??
+        await getApplicationDocumentsDirectory();
+  }
+  // Web or unsupported platform
+  return null;
+}
+
 class ErrorManager {
   static final Logger _logger = Logger(
     printer: PrettyPrinter(),
@@ -104,8 +116,13 @@ class ErrorManager {
         stackTrace: stackTrace,
       );
 
-      final directory = await getDownloadsDirectory() ??
-          await getApplicationDocumentsDirectory();
+      final directory = await getDownloadDir();
+      if (directory == null) {
+        if (kDebugMode) {
+          _logger.e('Download directory is not available.');
+        }
+        return;
+      }
       final logDirectory = Directory('${directory.path}/error_manager');
 
       // Create directory if it doesn't exist
