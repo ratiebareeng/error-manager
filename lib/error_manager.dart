@@ -31,7 +31,7 @@ class ErrorManager {
     String logMessage = errorMessage;
 
     final file =
-        fileName == null || fileName.isEmpty ? null : '\nFile: $fileName';
+        fileName != null && fileName.isNotEmpty ? '\nFile: $fileName' : null;
     if (file != null) {
       logMessage = logMessage + file;
     }
