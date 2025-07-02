@@ -37,7 +37,7 @@ class ErrorManager {
     }
 
     final function = originFunction != null && originFunction.isNotEmpty
-        ? '\nFunction: $fileName'
+        ? '\nFunction: $originFunction'
         : null;
 
     if (function != null) {
