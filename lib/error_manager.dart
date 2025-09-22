@@ -65,16 +65,22 @@ class ErrorManager {
     String? developer,
     StackTrace? stackTrace,
   }) {
-    String logMessage = generateMessage(
-      errorMessage: errorMessage,
-      fileName: fileName,
-      originFunction: originFunction,
-      developer: developer,
-      stackTrace: stackTrace,
-    );
+    // Check multiple ways to detect if we're running tests
+    final isRunningTests = const bool.fromEnvironment('FLUTTER_TEST',
+            defaultValue: false) ||
+        const bool.fromEnvironment('dart.library.test', defaultValue: false) ||
+        _isInTestEnvironment();
 
-    // Log to console in debug
-    if (kDebugMode) {
+    // Only log in debug mode AND when not running tests
+    if (kDebugMode && !isRunningTests) {
+      String logMessage = generateMessage(
+        errorMessage: errorMessage,
+        fileName: fileName,
+        originFunction: originFunction,
+        developer: developer,
+        stackTrace: stackTrace,
+      );
+
       //lineNumber: details.stackTrace?.lineNumber ?? 0,
       switch (logType) {
         case LogType.debug:
@@ -108,45 +114,68 @@ class ErrorManager {
     String? developer,
     StackTrace? stackTrace,
   }) async {
-    try {
-      String logMessage = generateMessage(
-        errorMessage: errorMessage,
-        fileName: fileName,
-        originFunction: originFunction,
-        developer: developer,
-        stackTrace: stackTrace,
-      );
+    // Check if we're running tests
+    final isRunningTests = const bool.fromEnvironment('FLUTTER_TEST',
+            defaultValue: false) ||
+        const bool.fromEnvironment('dart.library.test', defaultValue: false) ||
+        _isInTestEnvironment();
 
-      final directory = await getDownloadDir();
-      if (directory == null) {
-        if (kDebugMode) {
-          _logger.e('Download directory is not available.');
+    // Only log when not running tests
+    if (!isRunningTests) {
+      try {
+        String logMessage = generateMessage(
+          errorMessage: errorMessage,
+          fileName: fileName,
+          originFunction: originFunction,
+          developer: developer,
+          stackTrace: stackTrace,
+        );
+
+        final directory = await getDownloadDir();
+        if (directory == null) {
+          if (kDebugMode) {
+            _logger.e('Download directory is not available.');
+          }
+          return;
         }
-        return;
-      }
-      final logDirectory = Directory('${directory.path}/error_manager');
+        final logDirectory = Directory('${directory.path}/error_manager');
 
-      // Create directory if it doesn't exist
-      if (!await logDirectory.exists()) {
-        await logDirectory.create(recursive: true);
-      }
+        // Create directory if it doesn't exist
+        if (!await logDirectory.exists()) {
+          await logDirectory.create(recursive: true);
+        }
 
-      // Use logFileName if provided, otherwise default name
-      final filename = logFileName ??
-          'error_log_${DateTime.now().toIso8601String().replaceAll(':', '-')}.txt';
-      final file = File('${logDirectory.path}/$filename');
+        // Use logFileName if provided, otherwise default name
+        final filename = logFileName ??
+            'error_log_${DateTime.now().toIso8601String().replaceAll(':', '-')}.txt';
+        final file = File('${logDirectory.path}/$filename');
 
-      // Write to file
-      await file.writeAsString('$logMessage\n', mode: FileMode.append);
+        // Write to file
+        await file.writeAsString('$logMessage\n', mode: FileMode.append);
 
-      // Log success in debug mode
-      if (kDebugMode) {
-        _logger.i('Error logged to: ${file.path}');
+        // Log success in debug mode
+        if (kDebugMode) {
+          _logger.i('Error logged to: ${file.path}');
+        }
+      } catch (e, stack) {
+        if (kDebugMode) {
+          _logger.e('Failed to log error to file', error: e, stackTrace: stack);
+        }
       }
-    } catch (e, stack) {
-      if (kDebugMode) {
-        _logger.e('Failed to log error to file', error: e, stackTrace: stack);
-      }
+    }
+  }
+
+  /// Helper method to detect if we're in a test environment
+  /// by checking the call stack for test-related frames
+  static bool _isInTestEnvironment() {
+    try {
+      final stackTrace = StackTrace.current.toString();
+      return stackTrace.contains('package:test/') ||
+          stackTrace.contains('package:flutter_test/') ||
+          stackTrace.contains('_test.dart') ||
+          stackTrace.contains('/test/');
+    } catch (e) {
+      return false;
     }
   }
 }
